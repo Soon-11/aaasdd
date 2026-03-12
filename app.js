@@ -126,7 +126,9 @@ function initView() {
   const initial = getInitialYearMonth(monthKeys, years);
 
   els.loading.classList.add("hidden");
-  els.totalGames.textContent = String(state.dataset.meta?.total_games ?? 0);
+  if (els.totalGames) {
+    els.totalGames.textContent = String(state.dataset.meta?.total_games ?? 0);
+  }
 
   state.filters.year = initial.year;
   state.filters.month = initial.month;
@@ -358,7 +360,9 @@ function updateView() {
   renderDetail();
   syncNavButtons();
 
-  els.resultCount.textContent = `${state.filteredGames.length}개 게임`;
+  if (els.resultCount) {
+    els.resultCount.textContent = `${state.filteredGames.length}개 게임`;
+  }
   els.empty.classList.toggle("hidden", state.filteredGames.length !== 0);
 }
 
