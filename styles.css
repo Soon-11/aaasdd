@@ -892,6 +892,14 @@ body.notion-compact .filter-bar input {
   padding: 8px 10px;
 }
 
+body.notion-compact .notion-source-button {
+  padding: 8px 14px;
+  border-color: #bfdbfe;
+  background: #eff6ff;
+  color: #1d4ed8;
+  font-weight: 600;
+}
+
 body.notion-compact .calendar-panel {
   padding: 10px;
 }
