@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>게임 캘린더 관리자</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;700&family=Noto+Sans+KR:wght@400;500;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="./styles.css">
+</head>
+<body class="admin-page">
+  <div class="page-shell">
+    <header class="topbar">
+      <div class="topbar__brand">
+        <div class="topbar__logo">GC</div>
+        <div>
+          <h1>게임 캘린더 관리자</h1>
+        </div>
+      </div>
+      <div class="admin-actions">
+        <a href="./index.html" class="ghost-button">원본 보기</a>
+        <a href="./notion.html" class="ghost-button">노션용 보기</a>
+      </div>
+    </header>
+
+    <section class="panel admin-panel">
+      <div class="admin-toolbar">
+        <div class="filter-bar__row filter-bar__row--search">
+          <label for="admin-search">검색</label>
+          <input id="admin-search" type="search" placeholder="게임명, 개발사, 플랫폼 검색">
+        </div>
+        <div class="admin-actions">
+          <button id="export-admin-data" type="button" class="ghost-button">백업 내보내기</button>
+          <label class="ghost-button admin-file-label" for="import-admin-file">백업 가져오기</label>
+          <input id="import-admin-file" type="file" accept="application/json" hidden>
+          <button id="clear-admin-data" type="button" class="ghost-button">관리자 데이터 초기화</button>
+        </div>
+      </div>
+      <p id="admin-status" class="admin-status">브라우저에 저장되는 관리자 데이터입니다. 같은 브라우저/기기에서 바로 반영됩니다.</p>
+    </section>
+
+    <section class="panel admin-panel">
+      <div class="admin-panel__header">
+        <div>
+          <h2>새 게임 추가</h2>
+          <p>폼만 채우면 사이트와 노션용 페이지에 바로 반영됩니다.</p>
+        </div>
+      </div>
+
+      <form id="admin-add-form" class="admin-form">
+        <div class="admin-form__grid">
+          <label>
+            <span>게임명</span>
+            <input name="title" required>
+          </label>
+          <label>
+            <span>영문명</span>
+            <input name="subtitle">
+          </label>
+          <label>
+            <span>출시일</span>
+            <input name="release_date" type="date" required>
+          </label>
+          <label>
+            <span>상태</span>
+            <select name="status">
+              <option value="출시">출시</option>
+              <option value="테스트">테스트</option>
+              <option value="얼리 액세스">얼리 액세스</option>
+              <option value="행사">행사</option>
+            </select>
+          </label>
+          <label>
+            <span>개발사</span>
+            <input name="developer">
+          </label>
+          <label>
+            <span>유통사</span>
+            <input name="publisher">
+          </label>
+          <label>
+            <span>이미지 URL</span>
+            <input name="image">
+          </label>
+          <label>
+            <span>홈페이지 URL</span>
+            <input name="homepage">
+          </label>
+          <label>
+            <span>유튜브 URL</span>
+            <input name="youtube_embed" placeholder="watch 또는 embed 주소">
+          </label>
+          <label class="admin-form__wide">
+            <span>태그</span>
+            <input name="tags" placeholder="#RPG, #액션, #싱글플레이어">
+          </label>
+          <label class="admin-form__wide">
+            <span>설명</span>
+            <textarea name="description" rows="5"></textarea>
+          </label>
+        </div>
+
+        <fieldset class="admin-platforms">
+          <legend>플랫폼</legend>
+          <label><input type="checkbox" name="platforms" value="mobile"> MOBILE</label>
+          <label><input type="checkbox" name="platforms" value="pc"> PC</label>
+          <label><input type="checkbox" name="platforms" value="ps"> PS</label>
+          <label><input type="checkbox" name="platforms" value="switch"> SWITCH</label>
+          <label><input type="checkbox" name="platforms" value="xbox"> XBOX</label>
+        </fieldset>
+
+        <div class="admin-actions">
+          <button type="submit" class="ghost-button admin-primary">게임 추가</button>
+        </div>
+      </form>
+    </section>
+
+    <section class="panel admin-panel">
+      <div class="admin-panel__header">
+        <div>
+          <h2>직접 추가한 게임</h2>
+          <p>여기서 지우면 커스텀 게임이 완전히 삭제됩니다.</p>
+        </div>
+      </div>
+      <div id="custom-games-list" class="admin-list"></div>
+    </section>
+
+    <section class="panel admin-panel">
+      <div class="admin-panel__header">
+        <div>
+          <h2>숨긴 게임</h2>
+          <p>복원하면 다시 캘린더에 표시됩니다.</p>
+        </div>
+      </div>
+      <div id="hidden-games-list" class="admin-list"></div>
+    </section>
+
+    <section class="panel admin-panel">
+      <div class="admin-panel__header">
+        <div>
+          <h2>전체 게임 목록</h2>
+          <p>기본 데이터 게임은 숨기기, 커스텀 게임은 삭제가 가능합니다.</p>
+        </div>
+      </div>
+      <div id="all-games-list" class="admin-list"></div>
+    </section>
+  </div>
+
+  <script src="./admin.js"></script>
+</body>
+</html>

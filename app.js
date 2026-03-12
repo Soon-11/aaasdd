@@ -15,6 +15,7 @@ const state = {
 };
 
 const IS_NOTION_COMPACT = document.body.classList.contains("notion-compact");
+const ADMIN_STORAGE_KEY = "game_calendar_admin_v1";
 
 const els = {
   loading: document.getElementById("loading-state"),
@@ -76,7 +77,8 @@ async function loadDataset() {
       }
     }
 
-    state.dataset = mergeManualEntries(dataset, manual);
+    const admin = readAdminStorage();
+    state.dataset = mergeManualEntries(dataset, manual, admin);
     initView();
   } catch (error) {
     els.loading.classList.add("hidden");
@@ -93,14 +95,35 @@ function readJsonScript(id) {
   return JSON.parse(raw);
 }
 
-function mergeManualEntries(dataset, manual) {
+function mergeManualEntries(dataset, manual, admin = {}) {
   const base = structuredClone(dataset);
   base.games = Array.isArray(base.games) ? base.games : [];
   base.events = Array.isArray(base.events) ? base.events : [];
-  base.games.push(...(Array.isArray(manual.games) ? manual.games : []));
+  const hiddenIds = new Set(Array.isArray(admin.hiddenGameIds) ? admin.hiddenGameIds : []);
+  base.games = base.games.filter((game) => !hiddenIds.has(String(game.game_idx)));
+  const manualGames = Array.isArray(manual.games) ? manual.games : [];
+  const customGames = Array.isArray(admin.games) ? admin.games.filter((game) => !hiddenIds.has(String(game.game_idx))) : [];
+  base.games.push(...manualGames);
+  base.games.push(...customGames);
   base.events.push(...(Array.isArray(manual.events) ? manual.events : []));
   base.meta = buildMeta(base.games, base.events, base.meta?.source_files || []);
   return base;
+}
+
+function readAdminStorage() {
+  try {
+    const raw = window.localStorage.getItem(ADMIN_STORAGE_KEY);
+    if (!raw) {
+      return { games: [], hiddenGameIds: [] };
+    }
+    const parsed = JSON.parse(raw);
+    return {
+      games: Array.isArray(parsed.games) ? parsed.games : [],
+      hiddenGameIds: Array.isArray(parsed.hiddenGameIds) ? parsed.hiddenGameIds.map(String) : [],
+    };
+  } catch {
+    return { games: [], hiddenGameIds: [] };
+  }
 }
 
 function buildMeta(games, events, sourceFiles) {
