@@ -81,7 +81,7 @@ async function loadDataset() {
   } catch (error) {
     els.loading.classList.add("hidden");
     els.error.classList.remove("hidden");
-    els.error.textContent = `데이터를 불러오지 못했습니다. (${error.message})`;
+    setText(els.error, `데이터를 불러오지 못했습니다. (${error.message})`);
   }
 }
 
@@ -126,9 +126,7 @@ function initView() {
   const initial = getInitialYearMonth(monthKeys, years);
 
   els.loading.classList.add("hidden");
-  if (els.totalGames) {
-    els.totalGames.textContent = String(state.dataset.meta?.total_games ?? 0);
-  }
+  setText(els.totalGames, String(state.dataset.meta?.total_games ?? 0));
 
   state.filters.year = initial.year;
   state.filters.month = initial.month;
@@ -360,9 +358,7 @@ function updateView() {
   renderDetail();
   syncNavButtons();
 
-  if (els.resultCount) {
-    els.resultCount.textContent = `${state.filteredGames.length}개 게임`;
-  }
+  setText(els.resultCount, `${state.filteredGames.length}개 게임`);
   els.empty.classList.toggle("hidden", state.filteredGames.length !== 0);
 }
 
@@ -606,7 +602,7 @@ function getHighlightAnchorDate() {
 function renderCalendar(grouped) {
   els.calendarGrid.innerHTML = "";
   if (state.filters.month === "all") {
-    els.calendarTitle.textContent = "-";
+    setText(els.calendarTitle, "-");
     return;
   }
 
@@ -615,7 +611,7 @@ function renderCalendar(grouped) {
     return;
   }
 
-  els.calendarTitle.textContent = formatMonthLabel(state.filters.month);
+  setText(els.calendarTitle, formatMonthLabel(state.filters.month));
   const [year, month] = state.filters.month.split("-").map(Number);
   const firstDay = new Date(year, month - 1, 1).getDay();
   const daysInMonth = new Date(year, month, 0).getDate();
@@ -675,7 +671,7 @@ function renderWeekCalendar(grouped) {
   }
 
   const todayKey = getTodayKeyForSelectedMonth();
-  els.calendarTitle.textContent = `${formatDateLabel(toDateKey(days[0]))} ~ ${formatDateLabel(toDateKey(days[6]))}`;
+  setText(els.calendarTitle, `${formatDateLabel(toDateKey(days[0]))} ~ ${formatDateLabel(toDateKey(days[6]))}`);
 
   days.forEach((date) => {
     const dateKey = toDateKey(date);
@@ -733,13 +729,13 @@ function selectDate(dateKey, grouped, shouldScroll) {
 function renderDayList() {
   els.dayList.innerHTML = "";
   if (!state.selectedDateKey) {
-    els.dayTitle.textContent = "날짜를 선택하세요";
-    els.daySummary.textContent = "캘린더에서 날짜를 누르면 해당 일정이 나옵니다.";
+    setText(els.dayTitle, "날짜를 선택하세요");
+    setText(els.daySummary, "캘린더에서 날짜를 누르면 해당 일정이 나옵니다.");
     return;
   }
 
-  els.dayTitle.textContent = formatDateLabel(state.selectedDateKey);
-  els.daySummary.textContent = `${state.dayItems.length}개의 일정`;
+  setText(els.dayTitle, formatDateLabel(state.selectedDateKey));
+  setText(els.daySummary, `${state.dayItems.length}개의 일정`);
 
   state.dayItems.forEach((item) => {
     const title = item.game.title_ko || item.game.title || "-";
@@ -796,19 +792,19 @@ function renderDetail() {
   const { game, schedule } = selected;
   const title = game.title_ko || game.title || "-";
   applyDetailImage(game.image || "", title);
-  els.detailKicker.textContent = `게임 #${game.game_idx}`;
-  els.detailTitle.textContent = title;
-  els.detailSubtitle.textContent = game.title_en || game.subtitle || "";
+  setText(els.detailKicker, `게임 #${game.game_idx}`);
+  setText(els.detailTitle, title);
+  setText(els.detailSubtitle, game.title_en || game.subtitle || "");
   els.detailPrimaryMeta.innerHTML = `
     <span class="meta-badge ${statusClass(schedule)}">${escapeHtml(schedule.status || "-")}</span>
     <span class="meta-badge">${escapeHtml((schedule.platforms || []).map((value) => value.toUpperCase()).join(", ") || "-")}</span>
   `;
-  els.detailDeveloper.textContent = game.developer || "-";
-  els.detailPublisher.textContent = game.publisher || "-";
-  els.detailReleaseDate.textContent = (schedule.dates || []).join(" ~ ") || "-";
-  els.detailDescription.textContent = game.description || "설명이 없습니다.";
+  setText(els.detailDeveloper, game.developer || "-");
+  setText(els.detailPublisher, game.publisher || "-");
+  setText(els.detailReleaseDate, (schedule.dates || []).join(" ~ ") || "-");
+  setText(els.detailDescription, game.description || "설명이 없습니다.");
   els.detailDescription.classList.add("is-collapsed");
-  els.detailDescriptionToggle.textContent = "더보기";
+  setText(els.detailDescriptionToggle, "더보기");
   els.detailTags.innerHTML = (game.tags || [])
     .map((tag) => `<span class="schedule-pill">${escapeHtml(tag)}</span>`)
     .join("");
@@ -873,7 +869,7 @@ function syncNavButtons() {
 
 function toggleHighlights() {
   const hidden = els.highlightsList.classList.toggle("hidden");
-  els.toggleHighlights.textContent = hidden ? "열기" : "접기";
+  setText(els.toggleHighlights, hidden ? "열기" : "접기");
 }
 
 function openModal() {
@@ -891,7 +887,7 @@ function closeModal() {
 
 function toggleDescription() {
   const collapsed = els.detailDescription.classList.toggle("is-collapsed");
-  els.detailDescriptionToggle.textContent = collapsed ? "더보기" : "접기";
+  setText(els.detailDescriptionToggle, collapsed ? "더보기" : "접기");
 }
 
 function toggleLink(element, href) {
@@ -1090,6 +1086,12 @@ function escapeHtml(value) {
     .replaceAll(">", "&gt;")
     .replaceAll('"', "&quot;")
     .replaceAll("'", "&#39;");
+}
+
+function setText(element, value) {
+  if (element) {
+    element.textContent = value;
+  }
 }
 
 loadDataset();
