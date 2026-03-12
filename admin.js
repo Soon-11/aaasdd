@@ -23,12 +23,25 @@ loadAdminPage();
 
 async function loadAdminPage() {
   try {
-    const response = await fetch("./data/inven_dataset.json");
-    if (!response.ok) {
-      throw new Error(`HTTP ${response.status}`);
+    let data = null;
+    try {
+      const response = await fetch("./data/inven_dataset.json");
+      if (!response.ok) {
+        throw new Error(`HTTP ${response.status}`);
+      }
+      data = await response.json();
+    } catch {
+      const response = await fetch("./index.html");
+      if (!response.ok) {
+        throw new Error(`HTTP ${response.status}`);
+      }
+      const html = await response.text();
+      const match = html.match(/<script id="embedded-calendar-data" type="application\/json">\s*([\s\S]*?)\s*<\/script>/);
+      if (!match) {
+        throw new Error("embedded data not found");
+      }
+      data = JSON.parse(match[1]);
     }
-
-    const data = await response.json();
     adminState.baseGames = Array.isArray(data.games) ? data.games : [];
     hydrateAdminStorage();
     bindAdminEvents();
