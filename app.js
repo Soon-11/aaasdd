@@ -16,6 +16,7 @@ const state = {
 
 const IS_NOTION_COMPACT = document.body.classList.contains("notion-compact");
 const ADMIN_STORAGE_KEY = "game_calendar_admin_v1";
+const DATASET_CACHE_KEY = "game_calendar_dataset_cache_v1";
 
 const els = {
   loading: document.getElementById("loading-state"),
@@ -63,18 +64,25 @@ async function loadDataset() {
 
     if (!dataset || !Array.isArray(dataset.games)) {
       try {
-        const response = await fetch("./data/inven_dataset.json");
+        const response = await fetch("./data/inven_dataset.json", { cache: "no-store" });
         if (!response.ok) {
           throw new Error(`HTTP ${response.status}`);
         }
         dataset = await response.json();
+        writeDatasetCache(dataset);
       } catch {
-        dataset = {
-          meta: { total_games: 0, total_events: 0, source_files: [], months: {} },
-          games: [],
-          events: [],
-        };
+        dataset = readDatasetCache();
       }
+    } else {
+      writeDatasetCache(dataset);
+    }
+
+    if (!dataset || !Array.isArray(dataset.games)) {
+      dataset = {
+        meta: { total_games: 0, total_events: 0, source_files: [], months: {} },
+        games: [],
+        events: [],
+      };
     }
 
     const admin = readAdminStorage();
@@ -123,6 +131,23 @@ function readAdminStorage() {
     };
   } catch {
     return { games: [], hiddenGameIds: [] };
+  }
+}
+
+function readDatasetCache() {
+  try {
+    const raw = window.localStorage.getItem(DATASET_CACHE_KEY);
+    return raw ? JSON.parse(raw) : null;
+  } catch {
+    return null;
+  }
+}
+
+function writeDatasetCache(data) {
+  try {
+    window.localStorage.setItem(DATASET_CACHE_KEY, JSON.stringify(data));
+  } catch {
+    // ignore storage failures
   }
 }
 

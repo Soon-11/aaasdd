@@ -1,4 +1,5 @@
 const ADMIN_STORAGE_KEY = "game_calendar_admin_v1";
+const ADMIN_BASE_CACHE_KEY = "game_calendar_base_cache_v1";
 
 const adminState = {
   baseGames: [],
@@ -23,32 +24,73 @@ loadAdminPage();
 
 async function loadAdminPage() {
   try {
-    let data = null;
-    try {
-      const response = await fetch("./data/inven_dataset.json");
-      if (!response.ok) {
-        throw new Error(`HTTP ${response.status}`);
+    let data = readEmbeddedBaseDataset();
+    if (!data) {
+      try {
+        data = await fetchDatasetJson();
+      } catch {
+        try {
+          data = await fetchEmbeddedDataset();
+        } catch {
+          data = readBaseDatasetCache();
+        }
       }
-      data = await response.json();
-    } catch {
-      const response = await fetch("./index.html");
-      if (!response.ok) {
-        throw new Error(`HTTP ${response.status}`);
-      }
-      const html = await response.text();
-      const match = html.match(/<script id="embedded-calendar-data" type="application\/json">\s*([\s\S]*?)\s*<\/script>/);
-      if (!match) {
-        throw new Error("embedded data not found");
-      }
-      data = JSON.parse(match[1]);
     }
+
+    if (!data) {
+      throw new Error("기본 데이터를 찾지 못했습니다");
+    }
+
     adminState.baseGames = Array.isArray(data.games) ? data.games : [];
+    writeBaseDatasetCache(data);
     hydrateAdminStorage();
     bindAdminEvents();
     renderAdmin();
   } catch (error) {
     adminEls.status.textContent = `관리자 데이터를 불러오지 못했습니다. (${error.message})`;
   }
+}
+
+function readEmbeddedBaseDataset() {
+  const script = document.getElementById("admin-base-data");
+  if (script) {
+    try {
+      const parsed = JSON.parse(script.textContent || "null");
+      if (parsed && Array.isArray(parsed.games)) {
+        return parsed;
+      }
+    } catch {
+      // fall through to global
+    }
+  }
+  const embedded = window.__GAME_CALENDAR_BASE_DATA__;
+  if (embedded && Array.isArray(embedded.games)) {
+    return embedded;
+  }
+  return null;
+}
+
+async function fetchDatasetJson() {
+  const url = new URL("./data/inven_dataset.json", window.location.href);
+  const response = await fetch(url.href, { cache: "no-store" });
+  if (!response.ok) {
+    throw new Error(`HTTP ${response.status}`);
+  }
+  return response.json();
+}
+
+async function fetchEmbeddedDataset() {
+  const url = new URL("./index.html", window.location.href);
+  const response = await fetch(url.href, { cache: "no-store" });
+  if (!response.ok) {
+    throw new Error(`HTTP ${response.status}`);
+  }
+  const html = await response.text();
+  const match = html.match(/<script id="embedded-calendar-data" type="application\/json">\s*([\s\S]*?)\s*<\/script>/);
+  if (!match) {
+    throw new Error("embedded data not found");
+  }
+  return JSON.parse(match[1]);
 }
 
 function bindAdminEvents() {
@@ -86,6 +128,23 @@ function readAdminStorage() {
     };
   } catch {
     return { games: [], hiddenGameIds: [] };
+  }
+}
+
+function readBaseDatasetCache() {
+  try {
+    const raw = window.localStorage.getItem(ADMIN_BASE_CACHE_KEY);
+    return raw ? JSON.parse(raw) : null;
+  } catch {
+    return null;
+  }
+}
+
+function writeBaseDatasetCache(data) {
+  try {
+    window.localStorage.setItem(ADMIN_BASE_CACHE_KEY, JSON.stringify(data));
+  } catch {
+    // ignore storage failures
   }
 }
 
