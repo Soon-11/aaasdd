@@ -14,6 +14,8 @@ const state = {
   dayItems: [],
 };
 
+const IS_NOTION_COMPACT = document.body.classList.contains("notion-compact");
+
 const els = {
   loading: document.getElementById("loading-state"),
   error: document.getElementById("error-state"),
@@ -715,6 +717,10 @@ function selectDate(dateKey, grouped, shouldScroll) {
   renderCalendar(grouped);
   renderDayList();
   renderDetail();
+  if (IS_NOTION_COMPACT && state.dayItems.length) {
+    openModal();
+    return;
+  }
   if (shouldScroll) {
     scrollToDayList();
   }

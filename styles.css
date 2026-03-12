@@ -866,3 +866,74 @@ body {
     max-width: none;
   }
 }
+
+body.notion-compact .page-shell {
+  max-width: 100%;
+  padding: 8px;
+}
+
+body.notion-compact .topbar,
+body.notion-compact .highlights-panel,
+body.notion-compact .day-panel {
+  display: none;
+}
+
+body.notion-compact .filter-bar {
+  padding: 8px 10px;
+  margin-bottom: 8px;
+}
+
+body.notion-compact .filter-bar__grid {
+  grid-template-columns: minmax(180px, 1.4fr) minmax(220px, 1fr) auto;
+  gap: 8px 10px;
+}
+
+body.notion-compact .filter-bar input {
+  padding: 8px 10px;
+}
+
+body.notion-compact .calendar-panel {
+  padding: 10px;
+}
+
+body.notion-compact .calendar-toolbar {
+  margin-bottom: 8px;
+}
+
+body.notion-compact .calendar-toolbar strong {
+  font-size: 1.45rem;
+}
+
+body.notion-compact .calendar-weekdays span {
+  padding: 6px 4px;
+  font-size: 0.78rem;
+}
+
+body.notion-compact .calendar-cell {
+  min-height: 76px;
+  padding: 6px;
+}
+
+body.notion-compact .calendar-cell__day {
+  width: 26px;
+  height: 26px;
+  margin-bottom: 6px;
+}
+
+body.notion-compact .calendar-chip {
+  font-size: 0.72rem;
+  padding: 4px 6px;
+}
+
+body.notion-compact .calendar-cell__count {
+  top: 6px;
+  right: 6px;
+  min-width: 20px;
+  height: 20px;
+  font-size: 0.68rem;
+}
+
+body.notion-compact .modal__dialog {
+  width: min(560px, calc(100vw - 16px));
+  margin: 8px auto;
+}
