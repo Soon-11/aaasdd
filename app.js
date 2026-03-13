@@ -256,10 +256,7 @@ function initView() {
 
   if (els.openSourcePage) {
     els.openSourcePage.addEventListener("click", () => {
-      const opened = window.open("./index.html", "_blank", "noopener,noreferrer");
-      if (!opened) {
-        window.location.href = "./index.html";
-      }
+      window.open("./index.html", "_blank", "noopener,noreferrer");
     });
   }
 
