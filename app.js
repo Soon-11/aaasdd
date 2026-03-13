@@ -114,9 +114,50 @@ function mergeManualEntries(dataset, manual, admin = {}) {
   const customGames = Array.isArray(admin.games) ? admin.games.filter((game) => !hiddenIds.has(String(game.game_idx))) : [];
   base.games.push(...manualGames);
   base.games.push(...customGames);
+  base.games = dedupeGames(base.games);
   base.events.push(...(Array.isArray(manual.events) ? manual.events : []));
   base.meta = buildMeta(base.games, base.events, base.meta?.source_files || []);
   return base;
+}
+
+function dedupeGames(games) {
+  const seen = new Set();
+  const deduped = [];
+
+  for (const game of games) {
+    const key = buildGameDedupKey(game);
+    if (seen.has(key)) {
+      continue;
+    }
+    seen.add(key);
+    deduped.push(game);
+  }
+
+  return deduped;
+}
+
+function buildGameDedupKey(game) {
+  const title = normalizeDedupText(game.title_ko || game.title || game.title_en || "");
+  const schedules = (game.schedules || [])
+    .map((schedule) => {
+      const dates = [...(schedule.dates || [])].map((date) => String(date).trim()).sort().join(",");
+      const platforms = [...(schedule.platforms || [])].map((platform) => String(platform).trim().toLowerCase()).sort().join(",");
+      return [
+        schedule.year ?? "",
+        schedule.month ?? "",
+        normalizeDedupText(schedule.status || ""),
+        dates,
+        platforms,
+      ].join("|");
+    })
+    .sort()
+    .join("||");
+
+  return `${title}__${schedules}`;
+}
+
+function normalizeDedupText(value) {
+  return String(value).trim().toLowerCase();
 }
 
 function readAdminStorage() {
