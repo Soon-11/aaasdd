@@ -30,6 +30,7 @@ const els = {
   reset: document.getElementById("reset-filters"),
   resultCount: document.getElementById("result-count"),
   totalGames: document.getElementById("total-games"),
+  openSourcePage: document.getElementById("open-source-page"),
   prevMonth: document.getElementById("prev-month"),
   nextMonth: document.getElementById("next-month"),
   toggleHighlights: document.getElementById("toggle-highlights"),
@@ -211,6 +212,15 @@ function initView() {
     renderViewModeFilters();
     updateView();
   });
+
+  if (els.openSourcePage) {
+    els.openSourcePage.addEventListener("click", () => {
+      const opened = window.open("./index.html", "_blank", "noopener,noreferrer");
+      if (!opened) {
+        window.location.href = "./index.html";
+      }
+    });
+  }
 
   els.prevMonth.addEventListener("click", () => shiftCalendar(-1));
   els.nextMonth.addEventListener("click", () => shiftCalendar(1));
