@@ -638,6 +638,30 @@ body {
   background: rgba(17, 24, 39, 0.05);
 }
 
+.meta-badge--platform {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.meta-badge__icon {
+  width: 14px;
+  height: 14px;
+  display: inline-grid;
+  place-items: center;
+  flex: 0 0 auto;
+}
+
+.meta-badge__icon svg {
+  width: 14px;
+  height: 14px;
+  stroke: currentColor;
+  fill: none;
+  stroke-width: 1.8;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
 .item-card h4 {
   margin: 0;
   font-size: 0.94rem;

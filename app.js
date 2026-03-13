@@ -836,7 +836,6 @@ function renderDayList() {
   state.dayItems.forEach((item) => {
     const title = item.game.title_ko || item.game.title || "-";
     const subtitle = item.game.title_en || item.game.subtitle || "";
-    const platforms = (item.schedule.platforms || []).map((value) => value.toUpperCase()).join(", ") || "-";
     const dates = (item.schedule.dates || []).join(" ~ ") || "-";
     const summary = truncateText(item.game.description || item.game.subtitle || "", 120);
     const actions = buildCardActions(item.game);
@@ -855,7 +854,7 @@ function renderDayList() {
       <div class="item-card__body">
         <div class="item-card__meta">
           <span class="meta-badge ${statusClass(item.schedule)}">${escapeHtml(item.schedule.status || "-")}</span>
-          <span class="meta-badge">${escapeHtml(platforms)}</span>
+          ${renderPlatformMetaBadges(item.schedule.platforms || [])}
         </div>
         <h4>${escapeHtml(title)}</h4>
         ${subtitle ? `<p>${escapeHtml(subtitle)}</p>` : ""}
@@ -893,7 +892,7 @@ function renderDetail() {
   setText(els.detailSubtitle, game.title_en || game.subtitle || "");
   els.detailPrimaryMeta.innerHTML = `
     <span class="meta-badge ${statusClass(schedule)}">${escapeHtml(schedule.status || "-")}</span>
-    <span class="meta-badge">${escapeHtml((schedule.platforms || []).map((value) => value.toUpperCase()).join(", ") || "-")}</span>
+    ${renderPlatformMetaBadges(schedule.platforms || [])}
   `;
   setText(els.detailDeveloper, game.developer || "-");
   setText(els.detailPublisher, game.publisher || "-");
@@ -1134,6 +1133,36 @@ function statusClass(schedule) {
 function formatSourceTypes(values) {
   const filtered = values.filter((value) => value && value !== "all");
   return filtered.length ? filtered.join(", ").toUpperCase() : "ALL";
+}
+
+function renderPlatformMetaBadges(values) {
+  const filtered = [...new Set(values.map((value) => String(value).toLowerCase()).filter((value) => value && value !== "all"))];
+  if (!filtered.length) {
+    return `<span class="meta-badge">ALL</span>`;
+  }
+
+  return filtered
+    .map((value) => {
+      const label = getPlatformLabel(value);
+      return `
+        <span class="meta-badge meta-badge--platform">
+          <span class="meta-badge__icon">${renderPlatformIcon(value)}</span>
+          <span>${escapeHtml(label)}</span>
+        </span>
+      `;
+    })
+    .join("");
+}
+
+function getPlatformLabel(value) {
+  const labels = {
+    mobile: "MOBILE",
+    pc: "PC",
+    ps: "PS",
+    xbox: "XBOX",
+    switch: "SWITCH",
+  };
+  return labels[value] || value.toUpperCase();
 }
 
 function renderImageMarkup(src, alt, className) {
