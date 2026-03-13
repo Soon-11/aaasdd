@@ -227,7 +227,6 @@ async function addCustomGame(formData) {
     return;
   }
   adminEls.addForm.reset();
-  resetImagePreview();
   adminEls.status.textContent = "새 게임을 추가했습니다. 사이트와 노션 페이지를 새로고침하면 반영됩니다.";
   renderAdmin();
 }
@@ -298,6 +297,18 @@ function resetImagePreview() {
   }
 
   adminEls.imagePreview.textContent = "NO IMAGE";
+}
+
+function normalizeAdminImagePath(value) {
+  if (!value) {
+    return "";
+  }
+
+  if (value.startsWith("./") || value.startsWith("../") || value.startsWith("/")) {
+    return value;
+  }
+
+  return `./assets/images/${value}`;
 }
 
 function mapStatusToSourceType(status) {
