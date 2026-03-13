@@ -15,6 +15,7 @@ const adminEls = {
   customGamesList: document.getElementById("custom-games-list"),
   hiddenGamesList: document.getElementById("hidden-games-list"),
   allGamesList: document.getElementById("all-games-list"),
+  openStandaloneButton: document.getElementById("open-admin-standalone"),
   exportButton: document.getElementById("export-admin-data"),
   importFile: document.getElementById("import-admin-file"),
   clearButton: document.getElementById("clear-admin-data"),
@@ -98,6 +99,12 @@ function bindAdminEvents() {
     adminState.search = event.target.value.trim().toLowerCase();
     renderAdmin();
   });
+
+  if (adminEls.openStandaloneButton) {
+    adminEls.openStandaloneButton.addEventListener("click", () => {
+      window.open("./admin.html", "_blank", "noopener,noreferrer");
+    });
+  }
 
   adminEls.addForm.addEventListener("submit", (event) => {
     event.preventDefault();
