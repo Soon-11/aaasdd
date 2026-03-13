@@ -39,7 +39,7 @@ async function loadAdminPage() {
     }
 
     if (!data) {
-      throw new Error("湲곕낯 ?곗씠?곕? 李얠? 紐삵뻽?듬땲??);
+      throw new Error("기본 데이터를 찾지 못했습니다.");
     }
 
     adminState.baseGames = Array.isArray(data.games) ? data.games : [];
@@ -48,7 +48,7 @@ async function loadAdminPage() {
     bindAdminEvents();
     renderAdmin();
   } catch (error) {
-    adminEls.status.textContent = `愿由ъ옄 ?곗씠?곕? 遺덈윭?ㅼ? 紐삵뻽?듬땲?? (${error.message})`;
+    adminEls.status.textContent = `관리자 데이터를 불러오지 못했습니다. (${error.message})`;
   }
 }
 
@@ -167,7 +167,7 @@ async function addCustomGame(formData) {
   const title = String(formData.get("title") || "").trim();
   const releaseDate = String(formData.get("release_date") || "").trim();
   if (!title || !releaseDate) {
-    adminEls.status.textContent = "寃뚯엫紐낃낵 異쒖떆?쇱? ?꾩닔?낅땲??";
+    adminEls.status.textContent = "게임명과 출시일은 필수입니다.";
     return;
   }
 
@@ -177,9 +177,9 @@ async function addCustomGame(formData) {
   const year = date.getFullYear();
   const month = date.getMonth() + 1;
   const day = String(date.getDate()).padStart(2, "0");
-  const weekdays = ["??, "??, "??, "??, "紐?, "湲?, "??];
+  const weekdays = ["일", "월", "화", "수", "목", "금", "토"];
   const dateText = `${String(month).padStart(2, "0")}/${day}(${weekdays[date.getDay()]})`;
-  const status = String(formData.get("status") || "異쒖떆").trim();
+  const status = String(formData.get("status") || "출시").trim();
   const platforms = formData.getAll("platforms").map((value) => String(value));
   const tags = String(formData.get("tags") || "")
     .split(",")
@@ -223,11 +223,11 @@ async function addCustomGame(formData) {
     writeAdminStorage();
   } catch {
     adminState.customGames.shift();
-    adminEls.status.textContent = "???筌왖 ???貫援??됰슢??怨????貫梨??筌띾슢利??뤿연 ???貫釉?????곷뮸??덈뼄.";
+    adminEls.status.textContent = "관리자 데이터를 저장하지 못했습니다.";
     return;
   }
   adminEls.addForm.reset();
-  adminEls.status.textContent = "??寃뚯엫??異붽??덉뒿?덈떎. ?ъ씠?몄? ?몄뀡 ?섏씠吏瑜??덈줈怨좎묠?섎㈃ 諛섏쁺?⑸땲??";
+  adminEls.status.textContent = "새 게임이 추가되었습니다. 사이트나 노션 페이지를 새로고침하면 반영됩니다.";
   renderAdmin();
 }
 
@@ -244,9 +244,9 @@ function normalizeAdminImagePath(value) {
 }
 
 function mapStatusToSourceType(status) {
-  if (status.includes("?뚯뒪??)) return "test";
-  if (status.includes("?쇰━")) return "early";
-  if (status.includes("?됱궗")) return "event";
+  if (status.includes("테스트")) return "test";
+  if (status.includes("얼리")) return "early";
+  if (status.includes("행사")) return "event";
   return "release";
 }
 
@@ -260,7 +260,7 @@ function renderCustomGames() {
   const games = filterGames(adminState.customGames);
   adminEls.customGamesList.innerHTML = games.length
     ? games.map((game) => renderAdminCard(game, "custom")).join("")
-    : `<div class="admin-empty">吏곸젒 異붽???寃뚯엫???놁뒿?덈떎.</div>`;
+    : `<div class="admin-empty">직접 추가한 게임이 없습니다.</div>`;
 
   adminEls.customGamesList.querySelectorAll("[data-delete-custom]").forEach((button) => {
     button.addEventListener("click", () => {
@@ -277,7 +277,7 @@ function renderHiddenGames() {
   const games = filterGames(hiddenGames);
   adminEls.hiddenGamesList.innerHTML = games.length
     ? games.map((game) => renderAdminCard(game, "hidden")).join("")
-    : `<div class="admin-empty">?④릿 寃뚯엫???놁뒿?덈떎.</div>`;
+    : `<div class="admin-empty">숨긴 게임이 없습니다.</div>`;
 
   adminEls.hiddenGamesList.querySelectorAll("[data-restore-game]").forEach((button) => {
     button.addEventListener("click", () => {
@@ -299,7 +299,7 @@ function renderAllGames() {
 
   adminEls.allGamesList.innerHTML = games.length
     ? games.map((game) => renderAdminCard(game, game.is_custom ? "custom" : "base")).join("")
-    : `<div class="admin-empty">寃??寃곌낵媛 ?놁뒿?덈떎.</div>`;
+    : `<div class="admin-empty">검색 결과가 없습니다.</div>`;
 
   adminEls.allGamesList.querySelectorAll("[data-hide-game]").forEach((button) => {
     button.addEventListener("click", () => {
@@ -348,17 +348,17 @@ function renderAdminCard(game, mode) {
   const dateText = schedule?.dates?.join(" ~ ") || "-";
   const platformText = (schedule?.platforms || []).map((platform) => platform.toUpperCase()).join(", ") || "-";
   const action = mode === "hidden"
-    ? `<button type="button" class="ghost-button" data-restore-game="${escapeHtml(game.game_idx)}">蹂듭썝</button>`
+    ? `<button type="button" class="ghost-button" data-restore-game="${escapeHtml(game.game_idx)}">복원</button>`
     : mode === "custom"
-      ? `<button type="button" class="ghost-button" data-delete-custom="${escapeHtml(game.game_idx)}">??젣</button>`
-      : `<button type="button" class="ghost-button" data-hide-game="${escapeHtml(game.game_idx)}">?④린湲?/button>`;
+      ? `<button type="button" class="ghost-button" data-delete-custom="${escapeHtml(game.game_idx)}">삭제</button>`
+      : `<button type="button" class="ghost-button" data-hide-game="${escapeHtml(game.game_idx)}">숨기기</button>`;
 
   return `
     <article class="admin-card">
       <div class="admin-card__body">
         <h3>${escapeHtml(game.title_ko || game.title || "-")}</h3>
         <p>${escapeHtml(game.title_en || game.subtitle || "")}</p>
-        <div class="admin-card__meta">${escapeHtml(dateText)} 쨌 ${escapeHtml(platformText)}</div>
+        <div class="admin-card__meta">${escapeHtml(dateText)} · ${escapeHtml(platformText)}</div>
       </div>
       <div class="admin-actions">
         ${action}
@@ -390,10 +390,10 @@ function importAdminData(event) {
       adminState.customGames = Array.isArray(parsed.games) ? parsed.games : [];
       adminState.hiddenGameIds = Array.isArray(parsed.hiddenGameIds) ? parsed.hiddenGameIds.map(String) : [];
       writeAdminStorage();
-      adminEls.status.textContent = "諛깆뾽 ?뚯씪??媛?몄솕?듬땲??";
+      adminEls.status.textContent = "백업 파일을 가져왔습니다.";
       renderAdmin();
     } catch {
-      adminEls.status.textContent = "諛깆뾽 ?뚯씪 ?뺤떇???щ컮瑜댁? ?딆뒿?덈떎.";
+      adminEls.status.textContent = "백업 파일 형식이 올바르지 않습니다.";
     }
   };
   reader.readAsText(file, "utf-8");
@@ -401,14 +401,14 @@ function importAdminData(event) {
 }
 
 function clearAdminData() {
-  if (!window.confirm("吏곸젒 異붽???寃뚯엫怨??④? 紐⑸줉??紐⑤몢 珥덇린?뷀븷源뚯슂?")) {
+  if (!window.confirm("직접 추가한 게임과 숨김 목록을 모두 초기화할까요?")) {
     return;
   }
 
   adminState.customGames = [];
   adminState.hiddenGameIds = [];
   writeAdminStorage();
-  adminEls.status.textContent = "愿由ъ옄 ?곗씠?곕? 珥덇린?뷀뻽?듬땲??";
+  adminEls.status.textContent = "관리자 데이터를 초기화했습니다.";
   renderAdmin();
 }
 
