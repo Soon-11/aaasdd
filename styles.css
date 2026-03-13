@@ -1047,8 +1047,7 @@ body.admin-page .page-shell {
 }
 
 .admin-image-preview-block {
-  display: grid;
-  gap: 6px;
+  display: none;
 }
 
 .admin-image-preview {
