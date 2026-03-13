@@ -82,8 +82,9 @@
             <input name="publisher">
           </label>
           <label>
-            <span>이미지 URL</span>
-            <input name="image">
+            <span>이미지 업로드</span>
+            <input name="image" placeholder="예: abc123.jpg 또는 ./assets/images/abc123.jpg">
+            <small class="admin-field-help">로컬 파일을 선택하면 브라우저에 저장됩니다. 큰 이미지는 저장이 실패할 수 있습니다.</small>
           </label>
           <label>
             <span>홈페이지 URL</span>
@@ -101,6 +102,10 @@
             <span>설명</span>
             <textarea name="description" rows="5"></textarea>
           </label>
+          <div class="admin-form__wide admin-image-preview-block">
+            <span>이미지 미리보기</span>
+            <div id="admin-image-preview" class="admin-image-preview image-fallback">NO IMAGE</div>
+          </div>
         </div>
 
         <fieldset class="admin-platforms">

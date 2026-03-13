@@ -163,13 +163,15 @@ function writeAdminStorage() {
   window.localStorage.setItem(ADMIN_STORAGE_KEY, JSON.stringify(payload));
 }
 
-function addCustomGame(formData) {
+async function addCustomGame(formData) {
   const title = String(formData.get("title") || "").trim();
   const releaseDate = String(formData.get("release_date") || "").trim();
   if (!title || !releaseDate) {
     adminEls.status.textContent = "게임명과 출시일은 필수입니다.";
     return;
   }
+
+  const image = normalizeAdminImagePath(String(formData.get("image") || "").trim());
 
   const date = new Date(`${releaseDate}T00:00:00`);
   const year = date.getFullYear();
@@ -194,7 +196,7 @@ function addCustomGame(formData) {
     publisher: String(formData.get("publisher") || "").trim(),
     description: String(formData.get("description") || "").trim(),
     tags,
-    image: String(formData.get("image") || "").trim(),
+    image,
     homepage: String(formData.get("homepage") || "").trim(),
     wishlist: "",
     youtube_embed: String(formData.get("youtube_embed") || "").trim(),
@@ -217,10 +219,85 @@ function addCustomGame(formData) {
   };
 
   adminState.customGames.unshift(customGame);
-  writeAdminStorage();
+  try {
+    writeAdminStorage();
+  } catch {
+    adminState.customGames.shift();
+    adminEls.status.textContent = "?대?吏 ??λ굹 釉뚮씪?곗???λ챸??留뚮즺?섏뿬 ??λ븷 ???놁뒿?덈떎.";
+    return;
+  }
   adminEls.addForm.reset();
+  resetImagePreview();
   adminEls.status.textContent = "새 게임을 추가했습니다. 사이트와 노션 페이지를 새로고침하면 반영됩니다.";
   renderAdmin();
+}
+
+async function readSelectedImageAsDataUrl() {
+  const file = adminEls.imageFile?.files?.[0];
+  if (!file) {
+    return "";
+  }
+
+  if (!file.type.startsWith("image/")) {
+    throw new Error("이미지 파일만 업로드할 수 있습니다.");
+  }
+
+  if (file.size > MAX_IMAGE_FILE_SIZE) {
+    throw new Error("이미지는 2MB 이하 파일만 업로드할 수 있습니다.");
+  }
+
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = () => resolve(typeof reader.result === "string" ? reader.result : "");
+    reader.onerror = () => reject(new Error("이미지를 읽지 못했습니다."));
+    reader.readAsDataURL(file);
+  });
+}
+
+function syncImagePreview() {
+  const file = adminEls.imageFile?.files?.[0];
+  if (!file) {
+    resetImagePreview();
+    return;
+  }
+
+  if (!file.type.startsWith("image/")) {
+    adminEls.status.textContent = "이미지 파일만 업로드할 수 있습니다.";
+    adminEls.imageFile.value = "";
+    resetImagePreview();
+    return;
+  }
+
+  const reader = new FileReader();
+  reader.onload = () => {
+    setImagePreview(typeof reader.result === "string" ? reader.result : "");
+  };
+  reader.onerror = () => {
+    adminEls.status.textContent = "이미지 미리보기를 불러오지 못했습니다.";
+    resetImagePreview();
+  };
+  reader.readAsDataURL(file);
+}
+
+function setImagePreview(src) {
+  if (!adminEls.imagePreview) {
+    return;
+  }
+
+  if (!src) {
+    resetImagePreview();
+    return;
+  }
+
+  adminEls.imagePreview.innerHTML = `<img src="${escapeHtml(src)}" alt="업로드 이미지 미리보기">`;
+}
+
+function resetImagePreview() {
+  if (!adminEls.imagePreview) {
+    return;
+  }
+
+  adminEls.imagePreview.textContent = "NO IMAGE";
 }
 
 function mapStatusToSourceType(status) {
